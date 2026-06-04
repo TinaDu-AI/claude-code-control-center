@@ -48,6 +48,10 @@ BUSY_CAP = 3600         # clamp any single turn's span (guards against clock ske
 SESS_WINDOW = 4 * 3600  # a session stays on the card until idle this long (no hard "closed" signal)
 TREND_DAYS = 7          # how many days the sparkline shows
 CTX_WINDOW = 200000     # context window size the water-level is measured against
+# entrypoint (present in every transcript) → which channel/colour the widget shows.
+# More reliable than the live log's sid→src, which ages out and falls back to "其它".
+ENTRY_SRC = {"cli": "terminal", "claude-desktop": "claude",
+             "claude-vscode": "vscode", "vscode": "vscode"}
 
 
 def iso_epoch(s):
@@ -95,6 +99,8 @@ def scan_file(path, today0, want_tokens):
     usage = {}
     last_assistant = (0.0, 0, None)   # (ep, ctx, model) of newest main-chain reply
     max_ctx = 0                       # biggest prompt this session ever sent → window tier
+    min_ctx = None                    # smallest main-chain ctx ≈ overhead floor (post-compact level)
+    compact_ep = 0.0                  # time of the latest /compact (a context reset)
     entry = None                      # entrypoint: claude-desktop / cli / claude-vscode
     cwd = None                        # working dir of the session
     title = None                      # first human prompt → which conversation this is
@@ -112,15 +118,19 @@ def scan_file(path, today0, want_tokens):
                     entry = e.get("entrypoint")
                 if cwd is None:
                     cwd = e.get("cwd")
+                ep = iso_epoch(e.get("timestamp"))
+                if ep is None:
+                    continue
+                if e.get("isCompactSummary"):              # /compact reset marker
+                    if ep > compact_ep:
+                        compact_ep = ep
+                    continue                               # not a prompt / not activity / not a title
                 if title is None and e.get("type") == "user" and not e.get("isSidechain"):
                     c = (e.get("message") or {}).get("content")
                     if isinstance(c, str):
                         cs = c.strip().replace("\n", " ")
                         if cs and not cs.startswith("<"):
                             title = cs[:40]
-                ep = iso_epoch(e.get("timestamp"))
-                if ep is None:
-                    continue
                 typ = e.get("type")
                 if typ == "assistant":
                     act_ts.append(ep)                      # thinking / text / tool_use (incl. sub-agents)
@@ -137,6 +147,8 @@ def scan_file(path, today0, want_tokens):
                             ctxv = inp + cc + cr
                             if ctxv > max_ctx:
                                 max_ctx = ctxv
+                            if min_ctx is None or ctxv < min_ctx:
+                                min_ctx = ctxv
                             if ep >= last_assistant[0]:
                                 last_assistant = (ep, ctxv, m.get("model"))
                         if want_tokens and ep >= today0:
@@ -180,7 +192,12 @@ def scan_file(path, today0, want_tokens):
 
     sess = None
     if last_assistant[0] > 0:
-        sess = {"sid": sid, "t": last_assistant[0], "ctx": last_assistant[1],
+        ctx_now, t_now = last_assistant[1], last_assistant[0]
+        if compact_ep > last_assistant[0]:                 # compacted, no reply yet:
+            t_now = compact_ep                             #   it's recent activity, and
+            if min_ctx is not None:                        #   show the reset floor, not
+                ctx_now = min_ctx                          #   the stale pre-compact value
+        sess = {"sid": sid, "t": t_now, "ctx": ctx_now,
                 "max_ctx": max_ctx, "model": last_assistant[2],
                 "entry": entry, "cwd": cwd, "title": title}
     return day_rounds, day_busy, usage, sess
@@ -304,7 +321,7 @@ def compute(today0):
         window = 1000000 if tier > CTX_WINDOW else CTX_WINDOW
         sessions[sess["sid"]] = {
             "ctx": sess["ctx"], "window": window, "t": round(sess["t"], 1),
-            "model": sess.get("model"), "entry": ent,
+            "model": sess.get("model"), "entry": ent, "src": ENTRY_SRC.get(ent),
             "cwd": sess.get("cwd"), "title": sess.get("title"),
         }
 

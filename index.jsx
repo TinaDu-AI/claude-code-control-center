@@ -40,8 +40,6 @@ const SRC_ORDER = ["terminal", "claude", "vscode", "other"];
 
 export const refreshFrequency = 1000;
 
-// $HOME is expanded by the shell Übersicht runs this through. If your build of
-// Übersicht doesn't expand it, replace $HOME with your home path (echo $HOME).
 export const command =
   "cat $HOME/.claude/cc-progress.jsonl 2>/dev/null; " +
   "printf '@@STATS@@'; " +
@@ -263,7 +261,7 @@ export const render = ({ output }) => {
       if (!s) return null;
       const win = s.window || defWin;
       const pct = Math.max(0, Math.min(100, Math.round((s.ctx / win) * 100)));
-      return { sid, src: sidSrc[sid] || "other", ctx: s.ctx, win, pct, t: s.t || 0,
+      return { sid, src: s.src || sidSrc[sid] || "other", ctx: s.ctx, win, pct, t: s.t || 0,
                title: s.title || "", cwd: s.cwd || "" };
     })
     .filter(Boolean)

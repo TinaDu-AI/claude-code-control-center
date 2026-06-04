@@ -1,0 +1,10 @@
+# runtime data — contains your session titles & paths, never publish
+cc-progress.jsonl
+cc-progress-daily.json
+cc-stats-cache.json
+cc-history.json
+
+# python / macOS cruft
+__pycache__/
+*.pyc
+.DS_Store

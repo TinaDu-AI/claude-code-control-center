@@ -1,0 +1,42 @@
+{
+  "_comment": "Merge this 'hooks' block into ~/.claude/settings.json. Keep any hooks you already have — append, don't overwrite. Replace $HOME with your absolute home path (run: echo $HOME) since hook command strings are executed directly.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Task|Edit|Write|MultiEdit|NotebookEdit|Read|Glob|Grep|WebFetch|WebSearch|TodoWrite|ExitPlanMode|Skill|mcp__.*",
+        "hooks": [
+          { "type": "command", "command": "/usr/bin/python3 $HOME/.claude/cc-progress-hook.py start" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Task|Edit|Write|MultiEdit|NotebookEdit|Read|Glob|Grep|WebFetch|WebSearch|TodoWrite|ExitPlanMode|Skill|mcp__.*",
+        "hooks": [
+          { "type": "command", "command": "/usr/bin/python3 $HOME/.claude/cc-progress-hook.py end" }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "/usr/bin/python3 $HOME/.claude/cc-progress-hook.py reset" }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "/usr/bin/python3 $HOME/.claude/cc-progress-hook.py turn_start" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "/usr/bin/python3 $HOME/.claude/cc-progress-hook.py turn_end" }
+        ]
+      }
+    ]
+  }
+}

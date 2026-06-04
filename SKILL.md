@@ -109,7 +109,7 @@ json.dump(cur, open(sp, "w"), ensure_ascii=False, indent=2)
 - **多久才算"长任务"才显示**：`index.jsx` 的 `SHOW_AFTER_SEC`（默认 6s）。
 - **水位最多显示几个会话**：`index.jsx` 的 `MAX_CTX_ROWS`（默认 8）。卡片**没有固定高度**，会随活跃会话数自动伸缩；这个值只是个安全上限，超了才显示「还有 N 个 session…」。想要紧凑就调小。
 - **水位颜色阈值**：`index.jsx` 里 `b.pct >= 85 ? danger : b.pct >= 60 ? warn : ok`。
-- **会话闲置多久才撤下**：`cc-stats.py` 的 `SESS_WINDOW`（默认 6h）。**这是唯一可靠的"已结束"信号**——删除对话并不会删掉转录文件、应用也不暴露"还开着哪些会话"，所以只能靠"多久没动"判断。`SessionEnd` 钩子能把「装好钩子之后才开、且正常关闭（`/exit`、`/clear`）」的会话即时撤下，算加分项；直接删除的对话仍靠这个闲置超时兜底。想让删掉的更快消失就调小，想让闲置会话留更久就调大。
+- **会话闲置多久才撤下**：`cc-stats.py` 的 `SESS_WINDOW`（默认 24h）。开着没动的会话最多留这么久。**为什么靠"闲置时间"**：删除对话并不会删掉转录文件、应用也不暴露"还开着哪些会话"，所以没有可靠的"已删除"信号。`SessionEnd` 钩子能把「装好钩子之后才开、且正常关闭（`/exit`、`/clear`）」的会话即时撤下；直接删除的对话靠这个闲置超时兜底。想让删掉的更快消失就调小，想留更久就调大。
 - **窗口判定基准**：`cc-stats.py` 的 `CTX_WINDOW`（默认 200000，超过即判 1M）。
 - **工具 → 中文标签**：`cc-progress-hook.py` 的 `short_desc()`。已内置：跑/读/写/改/搜/找/抓/子任务、飞书(lark-cli)/腾讯会议/anysearch/Notion/微信/Gmail/电脑(computer-use)/浏览器(Chrome) 等中文映射，按自己常用的 MCP / CLI 改即可。
 - **来源配色**：`index.jsx` 的 `SRC`（终端深紫 / Claude 品牌紫 / VS Code 浅紫）。

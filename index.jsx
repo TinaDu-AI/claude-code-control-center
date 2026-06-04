@@ -13,6 +13,7 @@ const SHOW_AFTER_SEC = 6;          // a single task must run this long to surfac
 const STALE_SEC = 1800;            // in-flight item older than this = crashed → hide
 const TURN_FRESH_SEC = 150;        // hide "正在回复" this long after my last sign of life
 const MAX_ROWS = 5;                // most task rows to list at once
+const MAX_CTX_ROWS = 8;            // most context-water-level rows (card grows to fit; safety cap)
 const DESIGN_W = 280;              // internal layout width — leave this alone
 const WIDTH = 264;                 // 屏幕上卡片宽度(px),= 阅读卡(border-box,真·总宽)
 const SCALE = WIDTH / DESIGN_W;    // 整张卡按比例缩放,不变形
@@ -255,7 +256,7 @@ export const render = ({ output }) => {
   // goes quiet for SESS_WINDOW; cc-stats supplies the level, the live log the colour.
   const defWin = stats.ctx_window || 200000;
   const sessions = stats.sessions || {};
-  const ctxBars = Object.keys(sessions)
+  const ctxAll = Object.keys(sessions)
     .map((sid) => {
       const s = sessions[sid];
       if (!s) return null;
@@ -265,8 +266,9 @@ export const render = ({ output }) => {
                title: s.title || "", cwd: s.cwd || "" };
     })
     .filter(Boolean)
-    .sort((a, b) => b.t - a.t)            // most-recently-active session first
-    .slice(0, 3);
+    .sort((a, b) => b.t - a.t);           // most-recently-active session first
+  const ctxBars = ctxAll.slice(0, MAX_CTX_ROWS);   // show them all; card height auto-expands
+  const ctxExtra = ctxAll.length - ctxBars.length;
 
   // 7-day trend (oldest -> newest); height scales to the busiest day
   const trend = Array.isArray(stats.trend) ? stats.trend : [];
@@ -335,6 +337,7 @@ export const render = ({ output }) => {
                 </div>
               );
             })}
+            {ctxExtra > 0 && <div className="cc-more">还有 {ctxExtra} 个 session…</div>}
           </div>
         )}
 

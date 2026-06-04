@@ -105,6 +105,7 @@ json.dump(cur, open(sp, "w"), ensure_ascii=False, indent=2)
 
 - **卡片宽度 / 缩放**：`index.jsx` 顶部 `WIDTH`（默认 264）。
 - **多久才算"长任务"才显示**：`index.jsx` 的 `SHOW_AFTER_SEC`（默认 6s）。
+- **水位最多显示几个会话**：`index.jsx` 的 `MAX_CTX_ROWS`（默认 8）。卡片**没有固定高度**，会随活跃会话数自动伸缩；这个值只是个安全上限，超了才显示「还有 N 个 session…」。想要紧凑就调小。
 - **水位颜色阈值**：`index.jsx` 里 `b.pct >= 85 ? danger : b.pct >= 60 ? warn : ok`。
 - **会话挂多久没动就撤下**：`cc-stats.py` 的 `SESS_WINDOW`（默认 4h）。
 - **窗口判定基准**：`cc-stats.py` 的 `CTX_WINDOW`（默认 200000，超过即判 1M）。

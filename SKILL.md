@@ -9,7 +9,7 @@ version: 1.0.0
 Claude Code 经常有长任务（跑测试、改一堆文件、开子 agent），执行时用户盯着终端也看不出进度、更看不出同时在别处（Claude App / VS Code）还有没有别的会话在忙。这个 widget 把这些都摊到桌面一张卡上：
 
 - **实时任务行**：三个渠道里此刻在跑的工具，每行 `[来源标签] [在干嘛] [转圈] [已用时]`。没有工具在跑但还在这一轮里时，显示「正在思考」（还没动手）/「正在回复」（动过手在收尾）。
-- **上下文水位**：每个最近活跃的会话占了多少上下文窗口。**窗口大小按客户端自动识别**——某个客户端历史上越过过 200K，就判定它跑在 1M 窗口，它的所有会话都按 1M 算（否则 200K）。<60% 绿、60–85% 橙、≥85% 红。每条后面带那个会话的开场白，一眼知道是哪个对话。
+- **上下文水位**：每个最近活跃的会话占了多少上下文窗口。**窗口大小按客户端自动识别**——某个客户端历史上越过过 200K，就判定它跑在 1M 窗口，它的所有会话都按 1M 算（否则 200K）。<60% 绿、60–85% 橙、≥85% 红。每条后面带那个会话的开场白，一眼知道是哪个对话。会话结束（`/exit`、`/clear`、退出、删除）后会自动从卡片撤下（靠 `SessionEnd` 钩子）；手动 `/compact` 后水位即时降到开销地板，不再卡在旧值。
 - **近 7 天趋势**：每天对话轮数的迷你柱状图，今天高亮。
 - **底栏**：今日全渠道忙时长 · 对话轮数 · 新增 token（≈ 控制台用量）。
 
@@ -62,7 +62,7 @@ PY
 ```
 
 ### Step 4 — 把 5 个 hook 并进 `~/.claude/settings.json`
-> ⚠️ **合并，不要覆盖**。用户的 `settings.json` 里可能已有别的 hook / 权限 / `env`（甚至密钥）。**绝不整文件覆盖**，只把 `settings.hooks.json` 里 5 个事件（PreToolUse / PostToolUse / SessionStart / UserPromptSubmit / Stop）追加进去，已存在同名事件就往它的数组里 append 一条。命令里的 `$HOME` 同样换成绝对路径。
+> ⚠️ **合并，不要覆盖**。用户的 `settings.json` 里可能已有别的 hook / 权限 / `env`（甚至密钥）。**绝不整文件覆盖**，只把 `settings.hooks.json` 里 6 个事件（PreToolUse / PostToolUse / SessionStart / SessionEnd / UserPromptSubmit / Stop）追加进去，已存在同名事件就往它的数组里 append 一条。命令里的 `$HOME` 同样换成绝对路径。（`SessionEnd` 用来在会话结束/删除后把它的水位条撤下。）
 
 读 `settings.hooks.json`，读用户现有 `settings.json`，用 python 合并后写回（保留原有所有字段）。合并示例逻辑：
 ```python
@@ -117,10 +117,10 @@ json.dump(cur, open(sp, "w"), ensure_ascii=False, indent=2)
 - 安装/重装：用户说"装这个 widget"、"我也想要这个进度卡片"。
 - 排错：卡片不亮（多半是 hook 没并进 settings、或没新开会话）、水位百分比看着不对（窗口档位可在 `cc-history.json` 的 `entry_max` 里看学到了啥）、卡片显示但 token/轮数为 0（多半 `~/.claude/projects` 路径或权限问题，把脚本报错原样给用户）。
 - 改样式/阈值/标签：见「自定义」。
-- 卸载：删 `~/Library/Application Support/Übersicht/widgets/cc-progress.widget/`；删 `~/.claude/cc-progress-hook.py`、`~/.claude/cc-stats.py`、以及运行时数据 `~/.claude/cc-progress*.json*`、`~/.claude/cc-stats-cache.json`、`~/.claude/cc-history.json`；从 `~/.claude/settings.json` 的 `hooks` 里拿掉这 5 个 `cc-progress-hook.py` 条目。
+- 卸载：删 `~/Library/Application Support/Übersicht/widgets/cc-progress.widget/`；删 `~/.claude/cc-progress-hook.py`、`~/.claude/cc-stats.py`、以及运行时数据 `~/.claude/cc-progress*.json*`、`~/.claude/cc-stats-cache.json`、`~/.claude/cc-history.json`、`~/.claude/cc-ended.json`；从 `~/.claude/settings.json` 的 `hooks` 里拿掉这 6 个 `cc-progress-hook.py` 条目。
 
 ## 隐私
 
 - 全程本机，无网络请求，无需 API key。
 - `cc-stats.py` 只读 Claude Code 自己写的转录（`~/.claude/projects`）做统计，不上传。
-- 运行时数据文件（`cc-progress.jsonl` / `cc-stats-cache.json` / `cc-history.json` / `cc-progress-daily.json`）含你的会话标题与路径，**已被 `.gitignore` 挡住，不会进仓库**。
+- 运行时数据文件（`cc-progress.jsonl` / `cc-stats-cache.json` / `cc-history.json` / `cc-progress-daily.json` / `cc-ended.json`）含你的会话标题与路径，**已被 `.gitignore` 挡住，不会进仓库**。

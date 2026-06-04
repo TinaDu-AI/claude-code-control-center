@@ -31,6 +31,7 @@ STALE_TRIM_SEC = 6 * 3600  # on reset, drop log lines older than this (keeps fil
 HOME = os.path.expanduser("~")
 STATE = os.path.join(HOME, ".claude", "cc-progress.jsonl")
 DAILY = os.path.join(HOME, ".claude", "cc-progress-daily.json")
+ENDED = os.path.join(HOME, ".claude", "cc-ended.json")   # sids whose session ended → widget drops them
 
 SRC_LABEL = {"terminal": "终端", "claude": "Claude", "vscode": "VS Code", "other": "其它"}
 
@@ -275,6 +276,46 @@ def notify(title, msg):
         pass
 
 
+def _load_ended():
+    try:
+        with open(ENDED) as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else {}
+    except Exception:
+        return {}
+
+
+def _save_ended(d):
+    try:
+        tmp = ENDED + ".tmp"
+        with open(tmp, "w") as f:
+            json.dump(d, f)
+        os.replace(tmp, ENDED)
+    except Exception:
+        pass
+
+
+def mark_ended(sid):
+    """A session terminated (SessionEnd) → record it so the widget stops showing
+    its context water-level. Entries self-prune after 24h (idle-dropped by then)."""
+    if not sid:
+        return
+    now = time.time()
+    d = _load_ended()
+    d[sid] = now
+    _save_ended({k: v for k, v in d.items() if now - v < 24 * 3600})
+
+
+def unmark_ended(sid):
+    """A session (re)started or resumed → it's alive again, so un-end it."""
+    if not sid:
+        return
+    d = _load_ended()
+    if sid in d:
+        d.pop(sid, None)
+        _save_ended(d)
+
+
 def do_reset(sid):
     """Clear only THIS session's leftovers (+ ancient lines); keep other apps'
     in-flight events intact. Atomic via temp file + rename."""
@@ -304,7 +345,12 @@ def main():
     src = detect_src()
 
     if mode == "reset":
+        unmark_ended(sid)          # a (re)starting/resumed session is alive again
         do_reset(sid)
+        return
+
+    if mode == "session_end":
+        mark_ended(sid)            # session terminated → widget drops its water-level
         return
 
     # B — the whole turn: UserPromptSubmit -> turn_start, Stop -> turn_end.

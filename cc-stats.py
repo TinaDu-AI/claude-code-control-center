@@ -41,6 +41,7 @@ HOME = os.path.expanduser("~")
 PROJ = os.path.join(HOME, ".claude", "projects")
 CACHE = os.path.join(HOME, ".claude", "cc-stats-cache.json")
 HIST = os.path.join(HOME, ".claude", "cc-history.json")
+ENDEDF = os.path.join(HOME, ".claude", "cc-ended.json")  # sids the SessionEnd hook marked terminated
 
 TTL_SEC = 15            # recompute the whole output at most this often
 HIST_TTL = 3600         # recompute the heavy 7-day history at most this often
@@ -313,8 +314,19 @@ def compute(today0):
                 entry_max[ent] = mc
             live.append(sess)
 
+    try:
+        with open(ENDEDF) as f:
+            ended = json.load(f)
+        if not isinstance(ended, dict):
+            ended = {}
+    except Exception:
+        ended = {}
+
     sessions = {}
     for sess in live:
+        et = ended.get(sess["sid"])
+        if et is not None and et >= sess["t"]:     # session ended & nothing since → drop it
+            continue
         ent = sess.get("entry")
         # window = 1M if THIS session ever crossed 200K, OR its client is known 1M-capable
         tier = max(sess.get("max_ctx", 0), entry_max.get(ent, 0))

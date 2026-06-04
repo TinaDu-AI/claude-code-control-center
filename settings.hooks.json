@@ -24,6 +24,13 @@
         ]
       }
     ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          { "type": "command", "command": "/usr/bin/python3 $HOME/.claude/cc-progress-hook.py session_end" }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "hooks": [

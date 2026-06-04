@@ -3,6 +3,7 @@ cc-progress.jsonl
 cc-progress-daily.json
 cc-stats-cache.json
 cc-history.json
+cc-ended.json
 
 # python / macOS cruft
 __pycache__/

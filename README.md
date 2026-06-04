@@ -1,4 +1,4 @@
-# CC Progress Widget
+# Claude Code 控制中心 · Claude Code Control Center
 
 A macOS desktop widget (for [Übersicht](http://tracesof.net/uebersicht/)) that shows what **Claude Code** is doing right now — across **Terminal / the Claude desktop app / VS Code** at the same time — plus each session's context-window fill level and a 7-day activity trend. 100% local, no API key, nothing leaves your machine.
 
@@ -9,7 +9,7 @@ A macOS desktop widget (for [Übersicht](http://tracesof.net/uebersicht/)) that 
 ## Features
 
 - **实时任务行** — 三个渠道并行：每行 `[来源] [在干嘛] [转圈] [用时]`，工具映射成中文动词（跑 / 读 / 写 / 改 / 搜 / 找 / 抓 / 子任务…）。没工具在跑时区分「正在思考」与「正在回复」。
-- **上下文水位** — 每个活跃会话占了多少窗口。**按客户端自动识别 200K vs 1M 窗口**（某客户端历史越过 200K → 判定 1M）。<60% 绿 / 60–85% 橙 / ≥85% 红。每条带会话开场白，区分同渠道多个会话。
+- **上下文水位** — 每个活跃会话占了多少窗口。**按客户端自动识别 200K vs 1M 窗口**（某客户端历史越过 200K → 判定 1M）。<60% 绿 / 60–85% 橙 / ≥85% 红。每条带会话开场白，区分同渠道多个会话；会话结束/删除后自动撤下，会话多了卡片自动长高。
 - **近 7 天趋势** — 每日对话轮数迷你柱状图，今天高亮。
 - **底栏汇总** — 今日全渠道忙时长 · 对话轮数 · 新增 token（≈ 控制台用量）。
 
@@ -31,7 +31,7 @@ Manual:
 1. Install & launch [Übersicht](http://tracesof.net/uebersicht/).
 2. `cp cc-progress-hook.py cc-stats.py ~/.claude/`
 3. `cp index.jsx "~/Library/Application Support/Übersicht/widgets/cc-progress.widget/index.jsx"` (replace `$HOME` inside it with your home path).
-4. Merge `settings.hooks.json` into `~/.claude/settings.json` (append the 5 hooks, don't overwrite; replace `$HOME` with your home path).
+4. Merge `settings.hooks.json` into `~/.claude/settings.json` (append the 6 hooks, don't overwrite; replace `$HOME` with your home path).
 5. Start a **new** Claude Code session — the hooks attach at session start.
 
 Full steps, customization, and uninstall are in [`SKILL.md`](SKILL.md).

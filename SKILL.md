@@ -1,10 +1,12 @@
 ---
-name: cc-progress-widget
-description: 在 macOS 桌面上放一个 Claude Code 任务进度小卡片（Übersicht，264px 宽，Material 3 浅色）。同时盯三个渠道——终端 / Claude 桌面 App / VS Code——里正在跑的长任务，每行标出来源 + 此刻在干嘛（跑/读/写/改/搜/抓/子任务…）；下面是每个活跃会话的「上下文水位」（按客户端自动识别 200K 还是 1M 窗口，快满了变橙/红），再下面是近 7 天活跃度迷你柱状图，底栏汇总今日忙时长 / 对话轮数 / token 消耗。触发：用户说"装 cc 进度 widget"、"Claude Code 进度桌面卡片"、"看 claude code 在跑啥的 widget"、"cc-progress widget"、"做个 claude 任务进度小卡片"。
+name: claude-code-control-center
+description: 在 macOS 桌面上放一个「Claude Code 控制中心」小卡片（Übersicht，264px 宽，Material 3 浅色）——一眼掌管你所有在跑的 Claude Code。同时盯三个渠道——终端 / Claude 桌面 App / VS Code——里正在跑的长任务，每行标出来源 + 此刻在干嘛（跑/读/写/改/搜/抓/子任务…）；下面是每个活跃会话的「上下文水位」（按客户端自动识别 200K 还是 1M 窗口，快满了变橙/红，会话结束自动撤下），再下面是近 7 天活跃度迷你柱状图，底栏汇总今日忙时长 / 对话轮数 / token 消耗。触发：用户说"装 Claude Code 控制中心"、"Claude 管理器 widget"、"Claude Code 任务管理器 / 控制中心"、"看 claude code 在跑啥的桌面卡片"、"claude-code-control-center"。
 version: 1.0.0
 ---
 
-# CC Progress Widget — Claude Code 任务进度桌面卡片
+# Claude Code 控制中心 · Claude Code Control Center
+
+> 桌面任务进度卡片：一眼掌管所有在跑的 Claude Code。
 
 Claude Code 经常有长任务（跑测试、改一堆文件、开子 agent），执行时用户盯着终端也看不出进度、更看不出同时在别处（Claude App / VS Code）还有没有别的会话在忙。这个 widget 把这些都摊到桌面一张卡上：
 

@@ -1,8 +1,8 @@
 # Claude Code 控制中心 · Claude Code Control Center
 
-A macOS desktop widget (for [Übersicht](http://tracesof.net/uebersicht/)) that shows what **Claude Code** is doing right now — across **Terminal / the Claude desktop app / VS Code** at the same time — plus each session's context-window fill level and a 7-day activity trend. 100% local, no API key, nothing leaves your machine.
+**Mission control for every Claude Code you've got running.** One macOS desktop widget (via [Übersicht](http://tracesof.net/uebersicht/)) that watches Claude Code across **Terminal**, the **Claude desktop app**, and **VS Code** — all at once, in a single glance: live task rows, each session's context-window fill level (color-warned as it fills, auto-removed when the session ends), and a 7-day activity trend. 100% local, no API key, nothing ever leaves your machine.
 
-> 一张桌面小卡片，实时盯住 Claude Code 在三个渠道里跑的长任务、每个会话的上下文水位、近 7 天活跃度。纯本机，无需 API key。
+> **一块桌面「控制中心」，一眼掌管所有正在跑的 Claude Code。** 无论它跑在 **Terminal**、**Claude 桌面 App** 还是 **VS Code**——三处并发的长任务同屏直击，每个会话的上下文水位实时预警（快满变橙/红、会话结束自动撤下），近 7 天活跃尽收眼底。纯本机运行，零 API key，数据不出你的电脑。
 
 ![preview](docs/preview.png)
 

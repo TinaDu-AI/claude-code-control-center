@@ -6,7 +6,7 @@ version: 1.0.0
 
 # Claude Code 控制中心 · Claude Code Control Center
 
-> 桌面任务进度卡片：一眼掌管所有在跑的 Claude Code。
+> **一块桌面「控制中心」，一眼掌管所有正在跑的 Claude Code**——无论它跑在 **Terminal**、**Claude 桌面 App** 还是 **VS Code**，三处并发任务同屏直击，上下文水位实时预警、会话结束自动撤下，活跃趋势一览无余。纯本机，零 API key。
 
 Claude Code 经常有长任务（跑测试、改一堆文件、开子 agent），执行时用户盯着终端也看不出进度、更看不出同时在别处（Claude App / VS Code）还有没有别的会话在忙。这个 widget 把这些都摊到桌面一张卡上：
 
@@ -109,7 +109,7 @@ json.dump(cur, open(sp, "w"), ensure_ascii=False, indent=2)
 - **多久才算"长任务"才显示**：`index.jsx` 的 `SHOW_AFTER_SEC`（默认 6s）。
 - **水位最多显示几个会话**：`index.jsx` 的 `MAX_CTX_ROWS`（默认 8）。卡片**没有固定高度**，会随活跃会话数自动伸缩；这个值只是个安全上限，超了才显示「还有 N 个 session…」。想要紧凑就调小。
 - **水位颜色阈值**：`index.jsx` 里 `b.pct >= 85 ? danger : b.pct >= 60 ? warn : ok`。
-- **会话挂多久没动就撤下**：`cc-stats.py` 的 `SESS_WINDOW`（默认 4h）。
+- **会话闲置多久才撤下**：`cc-stats.py` 的 `SESS_WINDOW`（默认 16h）。这只是兜底——正常关闭/删除会话会被 `SessionEnd` 钩子**立刻**撤下，所以这个值可以设得宽松，让开着没动的会话一直在卡上。
 - **窗口判定基准**：`cc-stats.py` 的 `CTX_WINDOW`（默认 200000，超过即判 1M）。
 - **工具 → 中文标签**：`cc-progress-hook.py` 的 `short_desc()`。已内置：跑/读/写/改/搜/找/抓/子任务、飞书(lark-cli)/腾讯会议/anysearch/Notion/微信/Gmail/电脑(computer-use)/浏览器(Chrome) 等中文映射，按自己常用的 MCP / CLI 改即可。
 - **来源配色**：`index.jsx` 的 `SRC`（终端深紫 / Claude 品牌紫 / VS Code 浅紫）。

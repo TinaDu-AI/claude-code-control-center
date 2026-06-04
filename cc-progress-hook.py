@@ -350,7 +350,8 @@ def main():
         return
 
     if mode == "session_end":
-        mark_ended(sid)            # session terminated → widget drops its water-level
+        # /exit, /clear, AND deleting a conversation all fire SessionEnd (delete → reason "other")
+        mark_ended(sid)            # → drop this session's water-level from the card
         return
 
     # B — the whole turn: UserPromptSubmit -> turn_start, Stop -> turn_end.

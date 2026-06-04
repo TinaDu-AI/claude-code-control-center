@@ -32,10 +32,10 @@ Definitions (today, local time):
              crossed 200K — a 1M session sitting under 200K looks identical to a
              200K one, so the client tier is the only reliable signal. title =
              first human prompt, so each bar tells you which conversation it is.
-             Stays listed until it's idle for SESS_WINDOW (24h) — the reliable
-             signal. SessionEnd also drops a clean close instantly, but only for
-             sessions started after the hook was wired (and not for plain delete:
-             the app keeps the transcript on disk and exposes no live-list).
+             Stays listed until SessionEnd fires — a clean close (/exit, /clear)
+             OR deleting the conversation both fire it (delete → reason "other")
+             → instant drop, for sessions started after the hook was wired.
+             SESS_WINDOW (24h) is just the backstop for sessions left un-closed.
   trend    = last 7 calendar days [{date,rounds,busy_sec}] oldest→newest.
 """
 import sys, os, glob, json, time, datetime, bisect
@@ -49,9 +49,9 @@ ENDEDF = os.path.join(HOME, ".claude", "cc-ended.json")  # sids the SessionEnd h
 TTL_SEC = 15            # recompute the whole output at most this often
 HIST_TTL = 3600         # recompute the heavy 7-day history at most this often
 BUSY_CAP = 3600         # clamp any single turn's span (guards against clock skew)
-SESS_WINDOW = 24 * 3600  # open sessions persist up to this long idle; a clean close (/exit, /clear)
-#                          drops instantly via SessionEnd; a deleted-without-exit convo falls off at
-#                          this timeout (no reliable delete signal — the app keeps the transcript file).
+SESS_WINDOW = 24 * 3600  # idle backstop. /exit, /clear, AND deleting a convo all fire SessionEnd
+#                          (delete → reason "other") → instant drop, for sessions started after the
+#                          hook. This 24h only catches sessions abandoned without ever closing them.
 TREND_DAYS = 7          # how many days the sparkline shows
 CTX_WINDOW = 200000     # context window size the water-level is measured against
 # entrypoint (present in every transcript) → which channel/colour the widget shows.

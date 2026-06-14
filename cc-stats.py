@@ -327,8 +327,28 @@ def compute(today0):
     except Exception:
         ended = {}
 
+    # currently-running sessions: ~/.claude/sessions/ has one file per LIVE Claude
+    # Code process (every channel writes it; removed on exit). A session NOT here is
+    # closed / deleted / abandoned and must not occupy the water-level — even though
+    # its transcript .jsonl lingers on disk (Claude Code keeps it and writes no
+    # "deleted" marker, so the running index is the only reliable "still open" signal).
+    # running = None means the dir was unreadable → fall back to the old ended/24h logic.
+    running = None
+    sdir = os.path.join(HOME, ".claude", "sessions")
+    if os.path.isdir(sdir):
+        running = set()
+        for sf in glob.glob(os.path.join(sdir, "*.json")):
+            try:
+                rsid = (json.load(open(sf)) or {}).get("sessionId")
+                if rsid:
+                    running.add(rsid)
+            except Exception:
+                pass
+
     sessions = {}
     for sess in live:
+        if running is not None and sess["sid"] not in running:
+            continue     # process not alive → closed/deleted/abandoned, drop immediately
         et = ended.get(sess["sid"])
         if et is not None and et >= sess["t"]:     # session ended & nothing since → drop it
             continue
